@@ -4,9 +4,11 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:front_investoryb3/componets/home/cardTransaction.dart';
 import 'package:front_investoryb3/models/transactions.dart';
+import 'package:front_investoryb3/pages/stocklist.dart';
 import 'package:http/http.dart' as http;
 import '../db/db.dart';
 import '../repository/userrepo.dart';
+import 'createTransaction.dart';
 import 'landinpage.dart';
 
 class ListTransactions extends StatefulWidget {
@@ -46,7 +48,6 @@ class _ListTransactionsState extends State<ListTransactions> {
           transactionlist = fetchedTransactionList;
           nameuser = userlist[0].name;
         });
-        print('lista de transações: ${transactionlist}');
       } else {
         final resErro = res.body;
         print('Resposta: ${res.body} status code: ${res.statusCode}');
@@ -59,7 +60,7 @@ class _ListTransactionsState extends State<ListTransactions> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: const Text("Suas Transações"),
+        title: const Text("Todas as Transações"),
         actions: [
           IconButton(
             onPressed: () async {
@@ -107,17 +108,41 @@ class _ListTransactionsState extends State<ListTransactions> {
                 ],
               ),
             ),
-            ListTile(
-              title: const Text('Lista de ações'),
-              onTap: () {
-                // ir para stocklist
-              },
+            const SizedBox(
+              height: 20,
             ),
-            ListTile(
-              title: const Text('Transações'),
-              onTap: () {
-                // ir para página de trasações
-              },
+            Container(
+              color: Colors.blueAccent,
+              child: ListTile(
+                title: const Text(
+                  'Lista de ações',
+                  style: TextStyle(fontSize: 22, color: Colors.white),
+                ),
+                onTap: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const Stocklist()));
+                },
+              ),
+            ),
+            const SizedBox(
+              height: 20,
+            ),
+            Container(
+              color: Colors.cyan,
+              child: ListTile(
+                title: const Text(
+                  'Transações',
+                  style: TextStyle(fontSize: 22, color: Colors.white),
+                ),
+                onTap: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const ListTransactions()));
+                },
+              ),
             ),
           ],
         ),
@@ -138,7 +163,7 @@ class _ListTransactionsState extends State<ListTransactions> {
               ),
             ),
           const SizedBox(height: 30),
-          if (!transactionlist.isEmpty)
+          if (transactionlist.isNotEmpty)
             Expanded(
               child: ListView.builder(
                 itemCount: transactionlist.length,
@@ -163,7 +188,10 @@ class _ListTransactionsState extends State<ListTransactions> {
           Center(
             child: ElevatedButton(
               onPressed: () {
-                // Ir para  'Todas as transações' button tap
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const CreateTransaction()));
               },
               child: const Padding(
                 padding: EdgeInsets.all(14),
@@ -177,20 +205,6 @@ class _ListTransactionsState extends State<ListTransactions> {
                       MaterialStateProperty.all<Color>(Colors.green)),
             ),
           ),
-          const SizedBox(height: 20),
-          if (!transactionlist.isEmpty)
-            ElevatedButton(
-              onPressed: () {
-                // Ir para  'Todas as transações' button tap
-              },
-              child: const Padding(
-                padding: EdgeInsets.all(12),
-                child: Text(
-                  'Todas as transações',
-                  style: TextStyle(fontSize: 20),
-                ),
-              ),
-            ),
           const SizedBox(height: 20),
         ],
       ),

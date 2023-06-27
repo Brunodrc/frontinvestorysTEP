@@ -22,9 +22,7 @@ class _CreateTransactionState extends State<CreateTransaction> {
   TextEditingController typeofInput = TextEditingController();
   TextEditingController brokerageInput = TextEditingController();
 
-  bool isSalve = false;
-
-  Future<void> createTransaction(Transaction transaction) async {
+  Future<bool> createTransaction(Transaction transaction) async {
     final db = DatabaseConnect();
     final userlist = await db.getUsers();
     if (userlist.isNotEmpty) {
@@ -38,25 +36,20 @@ class _CreateTransactionState extends State<CreateTransaction> {
         "type_of": transaction.type_of.toUpperCase(),
         "brokerage": transaction.brokerage.toString(),
       };
-      print('dados enviados--> ${bodydata}');
+
       var res = await http.post(url,
           body: bodydata,
           headers: {HttpHeaders.authorizationHeader: headers_local});
-      if (res.statusCode == 201) {
-        isSalve = true;
+      if (res.statusCode >= 200) {
         print('deu certo');
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const ListTransactions(),
-          ),
-        );
+        return true;
       } else {
-        isSalve = false;
         print('Ocorreu um erro!');
         print('${res.body} o status code: ${res.statusCode}');
+        return false;
       }
     }
+    return false;
   }
 
   @override
@@ -187,7 +180,7 @@ class _CreateTransactionState extends State<CreateTransaction> {
                 height: 10,
               ),
               ElevatedButton(
-                onPressed: () {
+                onPressed: () async {
                   FocusScopeNode currentFocus = FocusScope.of(context);
                   if (_formkey.currentState!.validate()) {
                     Transaction newTrasaction = Transaction(
@@ -201,7 +194,15 @@ class _CreateTransactionState extends State<CreateTransaction> {
                       total_operation: 0,
                     );
                     createTransaction(newTrasaction);
-                    if (isSalve) {
+                    if (await createTransaction(newTrasaction)) {
+                      // ignore: use_build_context_synchronously
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const ListTransactions(),
+                        ),
+                      );
+
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
                           content: Text(
